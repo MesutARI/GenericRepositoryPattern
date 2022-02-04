@@ -1,0 +1,107 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+
+
+// 
+// This is an auto generated file. 
+// Do not make manual change
+//  
+using System;
+using System.Threading.Tasks;
+using GenericRepository.Core.Repositories;
+using GenericRepository.Core.Models;
+using GenericRepository.Core.Services;
+using GenericRepository.Core.UnitOfWorks;
+using GenericRepository.DataAccess.Contexts;
+using GenericRepository.DataAccess.Repositories;
+using GenericRepository.Service.Services;
+
+namespace GenericRepository.Service.UnitOfWorks
+{
+	public partial class UnitOfWork : IUnitOfWork
+    {
+		private <#=GetContextName()#> _context = new <#=GetContextName()#>();
+		
+		<# 
+		foreach(var name in GetModelNames())
+		{
+		#>
+		
+		private I<#=name#>Repository _<#=name#>Repository;
+        private I<#=name#>Repository <#=name#>Repository => _<#=name#>Repository = _<#=name#>Repository ?? new <#=name#>Repository(_context);
+        
+		
+        private I<#=name#>Service _<#=name#>Service;
+        public I<#=name#>Service <#=name#>Services => _<#=name#>Service = _<#=name#>Service ?? new <#=name#>Service(<#=name#>Repository);
+
+
+		<#
+		}
+		#>
+		
+	}
+}
+<#  
+  SaveGeneratedCodeAsFile("UnitOfWork" + ".g.cs");
+#>
+
+<#+
+private IEnumerable<string> GetModelNames()
+{
+	string dir = Path.GetDirectoryName(Host.TemplateFile);
+	dir = dir.Replace("Service", "Core");
+	dir = dir.Replace("Generated", "Models");
+	string[] fileEntries = Directory.GetFiles(dir);
+	for (int i = 0; i < fileEntries.Length; i++)
+    {
+		fileEntries[i] = fileEntries[i].Substring(dir.Length + 1);
+		fileEntries[i] = fileEntries[i].Replace(".cs",String.Empty);
+    }
+
+	return fileEntries;
+}
+
+private string diro()
+{
+	string dir = Path.GetDirectoryName(Host.TemplateFile);
+	dir = dir.Replace("Service", "Core");
+	dir = dir.Replace("Generated", "Models");
+	
+
+	return dir;
+}
+
+private string GetContextName()
+{
+	string dir = Path.GetDirectoryName(Host.TemplateFile);
+	dir = dir.Replace("Service", "DataAccess");
+	dir = dir.Replace("Generated", "Contexts");
+	string[] fileEntries = Directory.GetFiles(dir);
+	for (int i = 0; i < fileEntries.Length; i++)
+    {
+		fileEntries[i] = fileEntries[i].Substring(dir.Length + 1);
+		fileEntries[i] = fileEntries[i].Replace(".cs",String.Empty);
+    }
+
+	return fileEntries[0];
+}
+
+private void SaveGeneratedCodeAsFile(string fileName)
+{
+    string dir = Path.GetDirectoryName(Host.TemplateFile);
+  
+    string outputFilePath = Path.Combine(dir, fileName);
+    File.WriteAllText(outputFilePath, GenerationEnvironment.ToString()); 
+ 
+    GenerationEnvironment.Clear();
+}
+
+
+#>

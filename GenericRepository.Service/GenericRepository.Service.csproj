@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GenericRepository.Core\GenericRepository.Core.csproj" />
+    <ProjectReference Include="..\GenericRepository.DataAccess\GenericRepository.DataAccess.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Generated\GeneratedServices.tt">
+      <LastGenOutput>GeneratedServices.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="Generated\GeneratedUnitOfWork.tt">
+      <LastGenOutput>GeneratedUnitOfWork.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Generated\GeneratedServices.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>GeneratedServices.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Generated\GeneratedUnitOfWork.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>GeneratedUnitOfWork.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>
