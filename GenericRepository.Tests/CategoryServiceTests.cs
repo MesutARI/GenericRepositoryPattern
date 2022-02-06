@@ -45,11 +45,11 @@ namespace GenericRepository.Tests
             var _categoryName = "Confections";
 
             // Act
-            var _expected = _categoryService.GetById(_categoryId);
+            var _actual = _categoryService.GetById(_categoryId);
 
             // Assert
-            Assert.Equal(_categoryId, _expected.Contents.CategoryId);
-            Assert.Equal(_categoryName, _expected.Contents.CategoryName);
+            Assert.Equal(_categoryId, _actual.Contents.CategoryId);
+            Assert.Equal(_categoryName, _actual.Contents.CategoryName);
         }
         
         [Fact]
@@ -59,11 +59,11 @@ namespace GenericRepository.Tests
             var categoryId = 34;
 
             // Act
-            var _expected = _categoryService.GetById(categoryId);
+            var _actual = _categoryService.GetById(categoryId);
 
             // Assert
-            Assert.Null(_expected.Contents);
-
+            Assert.Equal(System.Net.HttpStatusCode.NoContent, _actual.StatusCode);
+            Assert.Null(_actual.Contents);
         }
 
         [Fact]
@@ -74,11 +74,11 @@ namespace GenericRepository.Tests
             var _categoryName = "Confections";
 
             // Act
-            var _expected = await _categoryService.GetByIdAsync(_categoryId);
+            var _actual = await _categoryService.GetByIdAsync(_categoryId);
 
             // Assert
-            Assert.Equal(_categoryId, _expected.Contents.CategoryId);
-            Assert.Equal(_categoryName, _expected.Contents.CategoryName);
+            Assert.Equal(_categoryId, _actual.Contents.CategoryId);
+            Assert.Equal(_categoryName, _actual.Contents.CategoryName);
         }
 
         [Fact]
@@ -88,10 +88,11 @@ namespace GenericRepository.Tests
             var categoryId = 34;
 
             // Act
-            var _expected = await _categoryService.GetByIdAsync(categoryId);
+            var _actual = await _categoryService.GetByIdAsync(categoryId);
 
             // Assert
-            Assert.Null(_expected.Contents);
+            Assert.Equal(System.Net.HttpStatusCode.NoContent, _actual.StatusCode);
+            Assert.Null(_actual.Contents);
 
         }
 
@@ -112,11 +113,11 @@ namespace GenericRepository.Tests
             mock.Setup(r => r.GetById(_categoryId)).Returns(_category);
 
             // Act
-            var _expected = _categoryServiceMock.GetById(_categoryId);
+            var _actual = _categoryServiceMock.GetById(_categoryId);
 
             // Assert
-            Assert.Equal(_categoryId, _expected.Contents.CategoryId);
-            Assert.Equal(_categoryName, _expected.Contents.CategoryName);
+            Assert.Equal(_categoryId, _actual.Contents.CategoryId);
+            Assert.Equal(_categoryName, _actual.Contents.CategoryName);
 
         }
 
@@ -130,10 +131,10 @@ namespace GenericRepository.Tests
             Expression<Func<Category, bool>> _predicate = r => r.CategoryId > 2;
 
             // Act
-            var _expected = _categoryService.CountWhere(_predicate);
+            var _actual = _categoryService.CountWhere(_predicate);
 
             // Assert
-            Assert.True(_expected > 0);
+            Assert.True(_actual > 0);
             
         }
 
@@ -144,10 +145,10 @@ namespace GenericRepository.Tests
             Expression<Func<Category, bool>> _predicate = r => r.CategoryId > 2;
 
             // Act
-            var _expected = await _categoryService.CountWhereAsync(_predicate);
+            var _actual = await _categoryService.CountWhereAsync(_predicate);
 
             // Assert
-            Assert.True(_expected > 0);
+            Assert.True(_actual > 0);
 
         }
 
@@ -158,10 +159,10 @@ namespace GenericRepository.Tests
             Expression<Func<Category, bool>> _predicate = r => r.CategoryId > 259 && r.CategoryName=="Tomatoes";
 
             // Act
-            var _expected = _categoryService.CountWhere(_predicate);
+            var _actual = _categoryService.CountWhere(_predicate);
 
             // Assert
-            Assert.Equal(0, _expected);
+            Assert.Equal(0, _actual);
 
         }
 
@@ -172,10 +173,10 @@ namespace GenericRepository.Tests
             Expression<Func<Category, bool>> _predicate = r => r.CategoryId > 259 && r.CategoryName == "Tomatoes";
 
             // Act
-            var _expected = await _categoryService.CountWhereAsync(_predicate);
+            var _actual = await _categoryService.CountWhereAsync(_predicate);
 
             // Assert
-            Assert.Equal(0, _expected);
+            Assert.Equal(0, _actual);
 
         }
         #endregion
@@ -188,11 +189,11 @@ namespace GenericRepository.Tests
             Expression<Func<Category, bool>> _predicate = r => r.CategoryId > 2;
 
             // Act
-            var _expected = _categoryService.GetWhere(_predicate);
+            var _actual = _categoryService.GetWhere(_predicate);
 
             // Assert
-            Assert.NotNull(_expected.Contents);
-            Assert.True(((List<Category>)_expected.Contents).Count > 0);
+            Assert.NotNull(_actual.Contents);
+            Assert.True(((List<Category>)_actual.Contents).Count > 0);
         }
 
         [Fact]
@@ -202,39 +203,44 @@ namespace GenericRepository.Tests
             Expression<Func<Category, bool>> _predicate = r => r.CategoryId > 2;
 
             // Act
-            var _expected = await _categoryService.GetWhereAsync(_predicate);
+            var _actual = await _categoryService.GetWhereAsync(_predicate);
 
             // Assert
-            Assert.NotNull(_expected.Contents);
+            Assert.NotNull(_actual.Contents);
+            Assert.True(((List<Category>)_actual.Contents).Count > 0);
 
         }
 
         [Fact]
-        public void GetWhere_ShouldReturnCategories_WhenConditionsWrong()
+        public void GetWhere_ShouldReturnNothing_WhenConditionsWrong()
         {
             // Arrange
             Expression<Func<Category, bool>> _predicate = r => r.CategoryId > 259 && r.CategoryName == "Tomatoes";
 
             // Act
-            var _expected = _categoryService.GetWhere(_predicate);
+            var _actual = _categoryService.GetWhere(_predicate);
 
             // Assert
-            Assert.True(_expected.Success);
-            Assert.True(((List<Category>)_expected.Contents).Count == 0);
+            Assert.False(_actual.Success);
+            Assert.Equal(System.Net.HttpStatusCode.NoContent, _actual.StatusCode);
+            Assert.Null(_actual.Contents);
+
+            //Assert.True(((List<Category>)_actual.Contents).Count == 0);
         }
 
         [Fact]
-        public async Task GetWhereAsync_ShouldReturnCategories_WhenConditionsWrong()
+        public async Task GetWhereAsync_ShouldReturnNothing_WhenConditionsWrong()
         {
             // Arrange
             Expression<Func<Category, bool>> _predicate = r => r.CategoryId > 259 && r.CategoryName == "Tomatoes";
 
             // Act
-            var _expected = await _categoryService.GetWhereAsync(_predicate);
+            var _actual = await _categoryService.GetWhereAsync(_predicate);
 
             // Assert
-            Assert.True(_expected.Success);
-            Assert.True(((List<Category>)_expected.Contents).Count == 0);
+            Assert.False(_actual.Success);
+            Assert.Equal(System.Net.HttpStatusCode.NoContent, _actual.StatusCode);
+            Assert.Null(_actual.Contents);
 
         }
         #endregion
@@ -254,12 +260,12 @@ namespace GenericRepository.Tests
             mock.Setup(r => r.Add(It.IsAny<Category>()));
 
             // Act
-            var _expected = _categoryServiceMock.Add(_category);
+            var _actual = _categoryServiceMock.Add(_category);
 
             // Assert
-            Assert.True(_expected.Success);
-            Assert.Equal(_expected.Contents.CategoryName, _category.CategoryName);
-            Assert.IsType<Category>(_expected.Contents);
+            Assert.True(_actual.Success);
+            Assert.Equal(_category.CategoryName, _actual.Contents.CategoryName);
+            Assert.IsType<Category>(_actual.Contents);
             mock.Verify();
 
         }
@@ -277,12 +283,12 @@ namespace GenericRepository.Tests
             mock.Setup(r => r.AddAsync(It.IsAny<Category>()));
 
             // Act
-            var _expected = await _categoryServiceMock.AddAsync(_category);
+            var _actual = await _categoryServiceMock.AddAsync(_category);
 
             // Assert
-            Assert.True(_expected.Success);
-            Assert.Equal(_expected.Contents.CategoryName, _category.CategoryName);
-            Assert.IsType<Category>(_expected.Contents);
+            Assert.True(_actual.Success);
+            Assert.Equal(_category.CategoryName, _actual.Contents.CategoryName);
+            Assert.IsType<Category>(_actual.Contents);
             mock.Verify();
         }
 
@@ -304,12 +310,12 @@ namespace GenericRepository.Tests
             mock.Setup(r => r.Update(It.IsAny<Category>()));
 
             // Act
-            var _expected = _categoryServiceMock.Update(_category);
+            var _actual = _categoryServiceMock.Update(_category);
 
             // Assert
-            Assert.True(_expected.Success);
-            Assert.Equal(_expected.Contents.CategoryName, _category.CategoryName);
-            Assert.IsType<Category>(_expected.Contents);
+            Assert.True(_actual.Success);
+            Assert.Equal(_category.CategoryName, _actual.Contents.CategoryName);
+            Assert.IsType<Category>(_actual.Contents);
             mock.Verify();
         }
 
@@ -327,15 +333,43 @@ namespace GenericRepository.Tests
             mock.Setup(r => r.UpdateAsync(It.IsAny<Category>()));
 
             // Act
-            var _expected = await _categoryServiceMock.UpdateAsync(_category);
+            var _actual = await _categoryServiceMock.UpdateAsync(_category);
 
             // Assert
-            Assert.True(_expected.Success);
-            Assert.Equal(_expected.Contents.CategoryName, _category.CategoryName);
-            Assert.IsType<Category>(_expected.Contents);
+            Assert.True(_actual.Success);
+            Assert.Equal(_category.CategoryName, _actual.Contents.CategoryName);
+            Assert.IsType<Category>(_actual.Contents);
             mock.Verify();
         }
 
+        #endregion
+
+        #region Delete
+
+        [Fact]
+        public void Delete_ShouldReturnCategory_WhenSuccessfulyDeleted_WithMock()
+        {
+            // Arrange
+            int _categoryId = 11;
+            var _category = new Category
+            {
+                CategoryId = 11,
+                CategoryName = "Drinks",
+                Description = "Desc",
+            };
+
+            var _expected = mock.Setup(r => r.GetById(_categoryId)).Returns(_category);
+
+            // Act
+            var _actual = _categoryServiceMock.Delete(_categoryId);
+
+            // Assert
+            Assert.True(_actual.Success);
+            Assert.Equal(_category.CategoryName, _actual.Contents.CategoryName);
+            Assert.IsType<Category>(_actual.Contents);
+            mock.Verify();
+        }
+        
         #endregion
 
         #endregion

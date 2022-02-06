@@ -2,7 +2,9 @@
 using GenericRepository.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,12 +35,13 @@ namespace GenericRepository.Service.Services
             try
             {
                 IEnumerable<T> t = this._genericRepository.GetAll();
-
-                return new GenericResponse<IEnumerable<T>>(t);
+                if (t != null && t.Count() > 0)
+                    return new GenericResponse<IEnumerable<T>>(t);
+                return new GenericResponse<IEnumerable<T>>($"!!! Unable to find any records in {typeof(T).Name}'s table ", HttpStatusCode.NoContent);
             }
             catch (Exception ex)
             {
-                return new GenericResponse<IEnumerable<T>>($"Fail:: {ex.Message}");
+                return new GenericResponse<IEnumerable<T>>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
             }
         }
 
@@ -47,12 +50,13 @@ namespace GenericRepository.Service.Services
             try
             {
                 IEnumerable<T> t = await this._genericRepository.GetAllAsync();
-
-                return new GenericResponse<IEnumerable<T>>(t);
+                if (t != null && t.Count() > 0)
+                    return new GenericResponse<IEnumerable<T>>(t);
+                return new GenericResponse<IEnumerable<T>>($"!!! Unable to find any records in {typeof(T).Name}'s table ", HttpStatusCode.NoContent);
             }
             catch (Exception ex)
             {
-                return new GenericResponse<IEnumerable<T>>($"Fail:: {ex.Message}");
+                return new GenericResponse<IEnumerable<T>>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
             }
         }
         #endregion
@@ -65,13 +69,12 @@ namespace GenericRepository.Service.Services
                 T t = this._genericRepository.GetById(id);
                 if (t != null)
                     return new GenericResponse<T>(t);
-                else
-                    return new GenericResponse<T>("!!! This Id does not exist");
+                return new GenericResponse<T>($"!!! Unable to find a record with Id: {id} in {typeof(T).Name}'s table", HttpStatusCode.NoContent);
             }
             catch (Exception ex)
             {
 
-                return new GenericResponse<T>($"Fail:: {ex.Message}");
+                return new GenericResponse<T>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
             }
         }
 
@@ -82,13 +85,12 @@ namespace GenericRepository.Service.Services
                 T t = await this._genericRepository.GetByIdAsync(id);
                 if (t != null)
                     return new GenericResponse<T>(t);
-                else
-                    return new GenericResponse<T>("!!! This Id does not exist");
+                return new GenericResponse<T>($"!!! Unable to find a record with Id: {id} in {typeof(T).Name}'s table", HttpStatusCode.NoContent);
             }
             catch (Exception ex)
             {
 
-                return new GenericResponse<T>($"Fail:: {ex.Message}");
+                return new GenericResponse<T>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
             }
         }
         #endregion
@@ -112,12 +114,13 @@ namespace GenericRepository.Service.Services
             try
             {
                 IEnumerable<T> t = this._genericRepository.GetWhere(predicate);
-                
-                return new GenericResponse<IEnumerable<T>>(t);
+                if (t != null && t.Count() > 0)
+                    return new GenericResponse<IEnumerable<T>>(t);
+                return new GenericResponse<IEnumerable<T>>($"!!! Unable to find any records in {typeof(T).Name}'s table by this conditions", HttpStatusCode.NoContent);
             }
             catch (Exception ex)
             {
-                return new GenericResponse<IEnumerable<T>>($"Fail:: {ex.Message}");
+                return new GenericResponse<IEnumerable<T>>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
             }
         }
 
@@ -126,12 +129,13 @@ namespace GenericRepository.Service.Services
             try
             {
                 IEnumerable<T> t = await this._genericRepository.GetWhereAsync(predicate);
-
-                return new GenericResponse<IEnumerable<T>>(t);
+                if (t != null && t.Count() > 0)
+                    return new GenericResponse<IEnumerable<T>>(t);
+                return new GenericResponse<IEnumerable<T>>($"!!! Unable to find any records in {typeof(T).Name}'s table by this conditions", HttpStatusCode.NoContent);
             }
             catch (Exception ex)
             {
-                return new GenericResponse<IEnumerable<T>>($"Fail:: {ex.Message}");
+                return new GenericResponse<IEnumerable<T>>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
             }
         }
         #endregion
@@ -150,7 +154,7 @@ namespace GenericRepository.Service.Services
             catch (Exception ex)
             {
 
-                return new GenericResponse<T>($"Fail:: {ex.Message}");
+                return new GenericResponse<T>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
             }
         }
 
@@ -166,8 +170,41 @@ namespace GenericRepository.Service.Services
             }
             catch (Exception ex)
             {
+                return new GenericResponse<T>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
+            }
+        }
+        #endregion
 
-                return new GenericResponse<T>($"Fail:: {ex.Message}");
+        #region Update
+        public GenericResponse<T> Update(T Entry)
+        {
+            try
+            {
+                this._genericRepository.Update(Entry);
+                //this._unitOfWork.CompleteAsync();
+
+                return new GenericResponse<T>(Entry);
+            }
+            catch (Exception ex)
+            {
+                return new GenericResponse<T>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
+
+            }
+        }
+
+        public async Task<GenericResponse<T>> UpdateAsync(T Entry)
+        {
+            try
+            {
+                await this._genericRepository.UpdateAsync(Entry);
+                //this._unitOfWork.CompleteAsync();
+
+                return new GenericResponse<T>(Entry);
+            }
+            catch (Exception ex)
+            {
+                return new GenericResponse<T>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
+
             }
         }
         #endregion
@@ -186,15 +223,12 @@ namespace GenericRepository.Service.Services
                     return new GenericResponse<T>(t);
                 }
                 else
-                {
-                    return new GenericResponse<T>("This Id does not exist");
-                }
-
+                    return new GenericResponse<T>($"!!! Unable to find any record for deleting with Id: {id} in {typeof(T).Name}'s table", HttpStatusCode.NoContent);
             }
             catch (Exception ex)
             {
 
-                return new GenericResponse<T>($"Fail:: {ex.Message}");
+                return new GenericResponse<T>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
             }
         }
 
@@ -211,49 +245,12 @@ namespace GenericRepository.Service.Services
                     return new GenericResponse<T>(t);
                 }
                 else
-                {
-                    return new GenericResponse<T>("This Id does not exist");
-                }
+                    return new GenericResponse<T>($"!!! Unable to find any record for deleting with Id: {id} in {typeof(T).Name}'s table", HttpStatusCode.NoContent);
 
             }
             catch (Exception ex)
             {
-
-                return new GenericResponse<T>($"Fail:: {ex.Message}");
-            }
-        }
-        #endregion
-
-        #region Update
-        public GenericResponse<T> Update(T Entry)
-        {
-            try
-            {
-                this._genericRepository.Update(Entry);
-                //this._unitOfWork.CompleteAsync();
-
-                return new GenericResponse<T>(Entry);
-            }
-            catch (Exception ex)
-            {
-                return new GenericResponse<T>($"Fail:: {ex.Message}");
-
-            }
-        }
-
-        public async Task<GenericResponse<T>> UpdateAsync(T Entry)
-        {
-            try
-            {
-                await this._genericRepository.UpdateAsync(Entry);
-                //this._unitOfWork.CompleteAsync();
-
-                return new GenericResponse<T>(Entry);
-            }
-            catch (Exception ex)
-            {
-                return new GenericResponse<T>($"Fail:: {ex.Message}");
-
+                return new GenericResponse<T>($"Fail:: {ex.Message}", HttpStatusCode.BadRequest);
             }
         }
         #endregion

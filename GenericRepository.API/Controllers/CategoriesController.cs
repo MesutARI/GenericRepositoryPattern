@@ -44,8 +44,11 @@ namespace GenericRepository.API.Controllers
                 return Ok(modelResources);
                 //return Ok(model.Contents);
             }
+            else if (model.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return NoContent();
             else
                 return BadRequest(model.Message);
+            
         }
 
         // api/categories/GetAllAsync
@@ -53,13 +56,13 @@ namespace GenericRepository.API.Controllers
         [Route("GetAllAsync")]
         public async Task<ActionResult> GetAllAsync()
         {
-            
             var model = await _unitOfWork.CategoryServices.GetAllAsync();
             if (model.Success)
                 return Ok(model.Contents);
+            else if (model.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return NoContent();
             else
                 return BadRequest(model.Message);
-
         }
         
         #endregion
@@ -70,9 +73,12 @@ namespace GenericRepository.API.Controllers
         [HttpGet("GetById/{Id}")]
         public ActionResult GetById(int Id)
         {
+            
             var model = _unitOfWork.CategoryServices.GetById(Id);
             if (model.Success)
                 return Ok(model.Contents);
+            else if (model.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return NoContent();
             else
                 return BadRequest(model.Message);
         }
@@ -201,10 +207,14 @@ namespace GenericRepository.API.Controllers
                     this._unitOfWork.Complete();
                     return Ok(deletingModel.Contents);
                 }
+
                 else
                     return BadRequest(deletedModel.Message);
+                
 
             }
+            else if (deletingModel.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return NoContent();
             else
                 return BadRequest(deletingModel.Message);
 
@@ -222,13 +232,17 @@ namespace GenericRepository.API.Controllers
 
                 if (deletedModel.Success)
                 {
-                    this._unitOfWork.Complete();
+                    await this._unitOfWork.CompleteAsync();
                     return Ok(deletingModel.Contents);
                 }
+                else if (deletedModel.Message.Contains("Fail::"))
+                    return NotFound(deletedModel.Message);
                 else
                     return BadRequest(deletedModel.Message);
 
             }
+            else if (deletingModel.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return NoContent();
             else
                 return BadRequest(deletingModel.Message);
 
